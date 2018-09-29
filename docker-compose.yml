@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  n26-dns:
+    image: n26-dns-proxy
+    build: .
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    env_file:
+      - .env

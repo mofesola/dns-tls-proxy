@@ -1,4 +1,4 @@
-FROM python:2.7.10
+FROM python:3.7
 LABEL Maintainer = "Mofesola Babalola <me@mofesola.com>"
 
 WORKDIR /usr/src/app

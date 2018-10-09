@@ -17,13 +17,13 @@ class Common:
 
     def get_tcp_from_udp(self, query):
         """Create TCP string from UDP query"""
-        message = "\x00" + chr(len(query)) + query
+        message = '\x00' + chr(len(query)) + query.decode('cp1252')
         return message
 
     def response(self, response, addr, sock, conn, protocol):
         """Format response string returned from Secure DNS Server"""
         if response:
-            rcode = response[:6].encode("hex")
+            rcode = response[:6].hex()
             rcode = str(rcode)[11:]
             if (int(rcode, 16) == 1):
                 logging.error("Wrong DNS Format")

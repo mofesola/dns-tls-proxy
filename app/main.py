@@ -1,4 +1,4 @@
-import thread
+import _thread as thread
 import os
 import socket
 import logging
@@ -8,21 +8,10 @@ from common import Common
 from multiprocessing import Process
 
 
-def router(data, addr, sock, conn, protocol):
-    """Route requests to handler based on protocol"""
-    tcp, udp = Tcp(), Udp()
-    if protocol == "tcp":
-        tcp.handler(data, addr, sock, conn, protocol)
-    elif protocol == "udp":
-        udp.handler(data, addr, sock, conn, protocol)
-    else:
-        logging.error("Unknown Protocol")
-
-
 def listen_tcp():
     """Listen on requested port for TCP DNS requests"""
     try:
-        common = Common()
+        common, tcp = Common(), Tcp()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((common.proxy_host(), int(common.proxy_port())))
         sock.listen(2)
@@ -30,8 +19,7 @@ def listen_tcp():
         while True:
             conn, addr = sock.accept()
             data = conn.recv(1024)
-            protocol = "tcp"
-            thread.start_new_thread(router, (data, addr, sock, conn, protocol))
+            thread.start_new_thread(tcp.handler, (data, addr, sock, conn, "tcp"))
     except Exception as e:
         logging.error(e)
         sock.close()
@@ -40,15 +28,13 @@ def listen_tcp():
 def listen_udp():
     """Listen on requested port for UDP DNS requests"""
     try:
-        common = Common()
+        common, udp = Common(), Udp()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((common.proxy_host(), int(common.proxy_port())))
         logging.info('Listening for UDP requests')
         while True:
             data, addr = sock.recvfrom(1024)
-            protocol = "udp"
-            conn = None
-            thread.start_new_thread(router, (data, addr, sock, conn, protocol))
+            thread.start_new_thread(udp.handler, (data, addr, sock, None, "udp"))
     except Exception as e:
         logging.error(e)
         sock.close()
